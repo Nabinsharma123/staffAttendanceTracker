@@ -17,9 +17,9 @@ import { Input } from "./ui/input";
 type ComponentPropsType = {
   isFormLoading?: boolean
   attendanceToUpdate?: AttendanceType,
-  calenderDateToAddAttendance?:string,
+  calenderDateToAddAttendance?: string,
   close?: () => void
-  onSubmit: (data: CreateOrUpdateAttendanceFromType, type: "create" | "update") => void
+  onSubmit?: (data: CreateOrUpdateAttendanceFromType, type: "create" | "update") => void
 }
 
 const CreateOrUpdateStaffAttendanceFrom = (props: ComponentPropsType) => {
@@ -29,15 +29,15 @@ const CreateOrUpdateStaffAttendanceFrom = (props: ComponentPropsType) => {
   const form = useForm<CreateOrUpdateAttendanceFromType>({
     resolver: zodResolver(createOrUpdateAttendanceFromValidation),
     defaultValues: {
-      date:attendanceToUpdate?attendanceToUpdate?.date:calenderDateToAddAttendance,
-      remarks: attendanceToUpdate?.remarks??"",
-      status: attendanceToUpdate?.status??AttendanceStatusEnum?.PRESENT
+      date: attendanceToUpdate ? attendanceToUpdate?.date : calenderDateToAddAttendance,
+      remarks: attendanceToUpdate?.remarks ?? "",
+      status: attendanceToUpdate?.status ?? AttendanceStatusEnum?.PRESENT
     }
   })
 
 
   const onFormSubmit: SubmitHandler<CreateOrUpdateAttendanceFromType> = (data) => {
-    onSubmit(data, attendanceToUpdate ? "update" : "create")
+    onSubmit?.(data, attendanceToUpdate ? "update" : "create")
   }
 
 
@@ -48,10 +48,10 @@ const CreateOrUpdateStaffAttendanceFrom = (props: ComponentPropsType) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onFormSubmit)} className="w-2/3 space-y-6">
 
-         <FormField
+          <FormField
             control={form.control}
             name="date"
-            render={({ field,fieldState }) => (
+            render={({ field, fieldState }) => (
               <FormItem>
                 <FormLabel>Date</FormLabel>
                 <FormControl>
@@ -63,17 +63,17 @@ const CreateOrUpdateStaffAttendanceFrom = (props: ComponentPropsType) => {
           />
 
 
-          
+
           <FormField
             control={form.control}
             name="status"
-            render={({ field,fieldState }) => (
+            render={({ field, fieldState }) => (
               <FormItem>
                 <FormLabel>Status</FormLabel>
                 <FormControl>
                   <Select
                     {...field}
-                    onValueChange={(value)=>field?.onChange(value)}
+                    onValueChange={(value) => field?.onChange(value)}
                   >
                     <SelectTrigger className="h-8">
                       <SelectValue placeholder="Select status" />
@@ -107,10 +107,11 @@ const CreateOrUpdateStaffAttendanceFrom = (props: ComponentPropsType) => {
           />
 
 
-          <Button type="submit">{
-            isFormLoading ? <Loader2Icon className="animate-spin" /> :
-              attendanceToUpdate ? "Update" : "Create"
-          }</Button>
+          <Button type="submit" disabled={isFormLoading}>
+            {isFormLoading && <Loader2Icon className="animate-spin" />}
+            {attendanceToUpdate ? "Update" : "Create"}
+
+          </Button>
         </form>
       </Form>
 

@@ -1,23 +1,19 @@
 "use client"
 import CreateOrUpdateStaffAttendanceFrom from "@/components/CreateOrUpdateStaffAttendanceForm";
-import FreeFormModal from "@/components/FreeFormModal";
 import Loading from "@/components/Loading";
 import StaffAttendanceCalenderModalView from "@/components/StaffAttendanceCalenderModalView";
-import AttendanceCalendar from "@/components/StaffAttendanceCalenderModalView";
-import { columns } from "@/components/tables/staff/columns"
-import { DataTable } from "@/components/tables/staff/dataTable"
-import { db } from "@/lib/firebase";
-import { prepareCalenderEventData, prepareCreateAttendancePayload, prepareUpdateAttendancePayload } from "@/lib/helpers";
+import { staffTableColumns } from "@/components/tables/columns"
+import { DataTable } from "@/components/tables/dataTable"
+import { Button } from "@/components/ui/button";
+import { prepareCreateAttendancePayload, prepareUpdateAttendancePayload } from "@/lib/helpers";
 import { createStaffAttendance, getStaffAttendances, getStaffs, updateStaffAttendance } from "@/lib/model";
-import { AttendanceDetailsType, AttendanceStatusEnum, AttendanceType, CalendarEventType, CreateOrUpdateAttendanceFromType, StaffType } from "@/lib/types";
-import { collection, getDoc, getDocs, Query, query, where } from "firebase/firestore/lite";
-import { useEffect, useRef, useState } from "react";
+import { AttendanceType, CreateOrUpdateAttendanceFromType, StaffType } from "@/lib/types";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 
 
 const Page = () => {
-  const fetchStaffsQuery = query(collection(db, "staffs"))
 
   const [staffs, setStaffs] = useState<StaffType[]>([]);
 
@@ -140,7 +136,12 @@ const Page = () => {
     <div className="h-full relative">
       {isLoading && <Loading />}
 
-      <DataTable columns={columns} data={staffs} onRowClick={onRowClick} />
+      <div className="flex w-full justify-end mb-2">
+        <Button>Create Staff</Button>
+      </div>
+      <DataTable columns={staffTableColumns} data={staffs} onRowClick={onRowClick} />
+
+
       {selectedStaff &&
         <StaffAttendanceCalenderModalView
           attendances={selectedStaffAttendances}

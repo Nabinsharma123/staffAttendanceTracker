@@ -16,7 +16,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { DataTablePagination } from "../DataTablePagination"
+// import { DataTablePagination } from "../DataTablePagination"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -85,7 +85,7 @@ export function DataTable<TData, TValue>({
             </div>
                     <div className="mt-2">
 
-            <DataTablePagination table={table} />
+            {/* <DataTablePagination table={table} /> */}
                     </div>
         </div>
 

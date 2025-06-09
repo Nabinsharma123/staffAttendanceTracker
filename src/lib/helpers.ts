@@ -24,10 +24,10 @@ export const prepareCalenderEventData = (attendance: AttendanceType): CalendarEv
 
 export const prepareCreateAttendancePayload = (
     formData: CreateOrUpdateAttendanceFromType,
-    staff:StaffType
+    staffId:string
 ): Omit<AttendanceType, "id"> => ({
     date:formData?.date,
-    staffId:staff?.id,
+    staffId,
     status:formData?.status,
     updatedAt:Date?.now().toLocaleString(),
     remarks:formData?.remarks,

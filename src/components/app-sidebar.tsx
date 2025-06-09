@@ -40,13 +40,13 @@ const data = {
   navMain: [
     {
       title: "Staffs",
-      url: "#",
+      url: "/Staffs",
       icon: Users,
       isActive: true,
 
     },
     {
-      title: "Models",
+      title: "Attendance",
       url: "#",
       icon: Bot,
     },

@@ -5,13 +5,13 @@ import { handleRequest } from "./helpers";
 
 
 export const getStaffs = async (
-    errorCb?:()=>void
-):Promise<StaffType[]> => {
+    errorCb?: () => void
+): Promise<StaffType[]> => {
     const fetchStaffsQuery = query(collection(db, "staffs"))
-  
-    const {data,error} = await handleRequest(getDocs(fetchStaffsQuery))
-    
-    if(error){
+
+    const { data, error } = await handleRequest(getDocs(fetchStaffsQuery))
+
+    if (error) {
         errorCb?.()
         return []
     }
@@ -32,16 +32,44 @@ export const getStaffs = async (
     return preparedStaffData
 }
 
+export const getAttendances = async (
+    errorCb?: () => void
+): Promise<AttendanceType[]> => {
+    const fetchAttendancesQuery = query(collection(db, "attendances"))
+
+    const { data, error } = await handleRequest(getDocs(fetchAttendancesQuery))
+
+    if (error) {
+        errorCb?.()
+        return []
+    }
+
+    let preparedAttendancesData: AttendanceType[] = []
+
+    data?.forEach((doc) => {
+        const docData = doc.data() as Omit<AttendanceType, "id">
+        preparedAttendancesData = [
+            ...preparedAttendancesData,
+            {
+                id: doc?.id,
+                ...docData
+            }
+        ]
+    })
+
+    return preparedAttendancesData
+}
+
 
 export const getStaffAttendances = async (
     staffId: string,
-    errorCb?:()=>void
-):Promise<AttendanceType[]> => {
+    errorCb?: () => void
+): Promise<AttendanceType[]> => {
     const fetchStaffAttendancesQuery = query(collection(db, "attendances"), where("staffId", "==", staffId))
 
-    const {data,error} = await handleRequest(getDocs(fetchStaffAttendancesQuery))
-    
-    if(error){
+    const { data, error } = await handleRequest(getDocs(fetchStaffAttendancesQuery))
+
+    if (error) {
         errorCb?.()
         return []
     }
@@ -64,20 +92,19 @@ export const getStaffAttendances = async (
 
 export const createStaffAttendance = async (
     payload: Omit<AttendanceType, "id">,
-    successCb?: () => void,
+    successCb?: (docId: string) => void,
     errorCb?: () => void,
     finalCb?: () => void
 ) => {
 
-    try {
-        await addDoc(collection(db, "attendances"),
-            payload
-        )
-        successCb?.()
-    } catch (error) {
-        
+
+    const { data, error } = await handleRequest(addDoc(collection(db, "attendances"), payload))
+    if (error) {
         errorCb?.()
+        finalCb?.()
     }
+
+    successCb?.(data?.id as string)
     finalCb?.()
 
 }

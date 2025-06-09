@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { createOrUpdateAttendanceFromValidation } from "./validations"
+import { createOrUpdateAttendanceFromValidation, createOrUpdateStaffValidation } from "./validations"
 
 export type StaffType = {
   id: string,
@@ -7,6 +7,14 @@ export type StaffType = {
   email: string,
   joiningDate: string,
   role: string
+}
+
+export type StaffAttendanceTableType={
+  id:string
+  name:string,
+  totalPresents:number,
+  totalAbsents:number,
+  totalLeaves:number
 }
 
 export type AttendanceStatus = 'present' | 'absent' | 'leave'
@@ -40,3 +48,5 @@ export type AttendanceDetailsType = {
 }
 
 export type CreateOrUpdateAttendanceFromType = z.infer<typeof createOrUpdateAttendanceFromValidation>
+
+export type createOrUpdateStaffFormType=z.infer<typeof createOrUpdateStaffValidation>

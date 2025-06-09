@@ -21,14 +21,14 @@ const AuthGuard = ({ children }: {
     })
 
     return (
-        <div>
+        <>
             {isLoading
              ?
              <div>Loading</div>
              :
              children
             }
-        </div>
+        </>
     )
 };
 

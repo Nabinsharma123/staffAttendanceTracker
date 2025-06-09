@@ -1,3 +1,4 @@
+"use client"
 import {
     Dialog,
     DialogContent,
@@ -18,19 +19,18 @@ const FreeFormModal = (props: ComponentPropsType) => {
     const { children, title, className, close } = props
     return (
         <Dialog open >
-            <DialogContent className={className} showCloseButton={false} >
-                <DialogHeader>
+            <DialogContent aria-describedby={undefined} className={`flex flex-col max-h-[90vh] ${className}`} showCloseButton={false} >
+                <DialogHeader className="flex-1">
                     <div className="flex justify-between">
                     <DialogTitle>{title}</DialogTitle>
                     <button onClick={close}>
                     <X />
-
                     </button>
                     </div>
-                    <div>
+                </DialogHeader>
+                    <div className="h-full overflow-auto">
                         {children}
                     </div>
-                </DialogHeader>
             </DialogContent>
         </Dialog>
     )

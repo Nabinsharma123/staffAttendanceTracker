@@ -1,17 +1,18 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'
 import { EventClickArg } from '@fullcalendar/core'
-import { CalendarEvent } from '@/lib/types'
+import { AttendanceType, CalendarEventType } from '@/lib/types'
 import FreeFormModal from './FreeFormModal'
+import { prepareCalenderEventData } from '@/lib/helpers'
 
 
 
 type ComponentPropsType = {
-  events?: CalendarEvent[]
+  attendances: AttendanceType[]
   onDateClick?: (arg: DateClickArg) => void
   onEventClick?: (arg: EventClickArg) => void
   close?:()=>void
@@ -20,22 +21,28 @@ type ComponentPropsType = {
 const StaffAttendanceCalenderModalView = (props: ComponentPropsType) => {
 
   const {
-    events,
+    attendances=[],
     onDateClick,
     onEventClick,
     close
   } = props
 
+  const [events, setEvents] = useState<CalendarEventType[]>([]);
+
+  useEffect(()=>{
+    setEvents(attendances?.map(prepareCalenderEventData))
+  },[attendances])
+
 
   return (
-    <FreeFormModal className='min-w-[80vw]' title='title' close={close}>
+    <FreeFormModal className='min-w-[80vw] !h-[90vh]' title='title' close={close}>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={events}
         dateClick={onDateClick}
         eventClick={onEventClick}
-        height="80vh"
+        height="100%"
         
       />
 

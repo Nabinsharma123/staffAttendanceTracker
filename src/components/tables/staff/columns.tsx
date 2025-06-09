@@ -11,9 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Staff } from "@/lib/types"
+import { StaffType } from "@/lib/types"
 
-export const columns: ColumnDef<Staff>[] = [
+export const columns: ColumnDef<StaffType>[] = [
   {
     accessorKey: "name",
     header: "Name",

@@ -1,21 +1,26 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
 
-export default function Page() {
+import { columns } from "@/components/tables/staff/columns"
+import { DataTable } from "@/components/tables/staff/dataTable"
+
+async function getData(): Promise {
+  // Fetch data from your API here.
+  return [
+    {
+      id: "728ed52f",
+      amount: 100,
+      status: "pending",
+      email: "m@example.com",
+    },
+    // ...
+  ]
+}
+
+export default async function DemoPage() {
+  const data = await getData()
+
   return (
-    <div>ok</div>
+    <div className="container mx-auto py-10">
+      <DataTable columns={columns} data={data} />
+    </div>
   )
 }

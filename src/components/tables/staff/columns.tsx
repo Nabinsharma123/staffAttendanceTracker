@@ -11,24 +11,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { Staff } from "@/lib/types"
 
-export const columns: ColumnDef[] = [
+export const columns: ColumnDef<Staff>[] = [
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "name",
+    header: "Name",
   },
   {
     accessorKey: "email",
     header: "Email",
   },
   {
-    accessorKey: "amount",
-    header: "Amount",
+    accessorKey: "role",
+    header: "Role",
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const payment = row.original
+    cell: () => {
  
       return (
         <DropdownMenu>

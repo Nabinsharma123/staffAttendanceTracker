@@ -102,17 +102,11 @@ const Page = () => {
   }
 
   const deleteLocalStaff=(staffId:string)=>{
-    console.log(staffId);
-    console.log(staffs);
     
     const updatedStaffs=staffs?.filter((staff)=>staff?.id!==staffId)
     setStaffs(updatedStaffs)
   }
 
-  useEffect(()=>{
-    console.log(staffs);
-    
-  },[staffs])
 
   const CreateOrUpdateStaffFormSubmit=(data:createOrUpdateStaffFormType,type:"create"|"update")=>{
       setIsFormLoading(true)

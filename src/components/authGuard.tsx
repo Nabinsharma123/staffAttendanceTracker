@@ -19,8 +19,6 @@ const AuthGuard = ({ children }: {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((session) => {
-            console.log(session);
-            console.log(pathname);
             
             if (!session) {
                 setIsLoading(false);

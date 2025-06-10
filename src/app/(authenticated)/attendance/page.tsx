@@ -1,9 +1,11 @@
 "use client"
 import CreateOrUpdateStaffAttendanceFrom from "@/components/CreateOrUpdateStaffAttendanceForm";
+import { DatePicker } from "@/components/datePicker";
 import Loading from "@/components/Loading";
 import StaffAttendanceCalenderModalView from "@/components/StaffAttendanceCalenderModalView";
 import { staffAttendanceTableColumns } from "@/components/tables/columns"
 import { DataTable } from "@/components/tables/dataTable"
+import { Button } from "@/components/ui/button";
 import { prepareCreateAttendancePayload, prepareUpdateAttendancePayload } from "@/lib/helpers";
 import { createStaffAttendance, getAttendances, getStaffAttendances, getStaffs, updateStaffAttendance } from "@/lib/model";
 import { AttendanceStatusEnum, AttendanceType, CreateOrUpdateAttendanceFromType, StaffAttendanceTableType, StaffType } from "@/lib/types";
@@ -14,9 +16,17 @@ import { toast } from "sonner";
 
 const Page = () => {
 
-    const [staffs, setStaffs] = useState<StaffAttendanceTableType[]>([]);
+    const [staffs, setStaffs] = useState<StaffType[]>([]);
+    const [aggregatedStaffsData, setAggregatedStaffsData] = useState<StaffAttendanceTableType[]>([]);
     const [attendances, setAttendances] = useState<AttendanceType[]>([]);
-
+    const [filteredAttendances, setFilteredAttendances] = useState<AttendanceType[]>([]);
+    const [filterDates, setFilterDates] = useState<{
+        starting: string | undefined,
+        ending: string | undefined
+    }>({
+        starting: undefined,
+        ending: undefined
+    });
 
     const [selectedStaff, setSelectedStaff] = useState<StaffAttendanceTableType | undefined>(undefined);
     const [calenderDateToAddAttendance, setCalenderDateToAddAttendance] = useState<string | undefined>(undefined);
@@ -29,7 +39,7 @@ const Page = () => {
     const initializePage = async () => {
 
         setIsLoading(true)
-        const response=await Promise.all([
+        const response = await Promise.all([
             getStaffs(() => {
                 toast.error("Error while getting staffs")
             }),
@@ -39,59 +49,62 @@ const Page = () => {
         ])
 
 
-        const staffs=response?.[0],
-            attendances=response?.[1]
+        const staffs = response?.[0],
+            attendances = response?.[1]
 
-        const preparedStaffs=staffs.map((staff)=>calculateAggregatedStaffData(staff,attendances))
-        setStaffs(preparedStaffs)
+        setStaffs(staffs)
         setAttendances(attendances)
+        setFilteredAttendances(attendances)
+
+         const preparedStaffs = staffs.map((staff) => calculateAggregatedStaffData(staff, attendances))
+        setAggregatedStaffsData(preparedStaffs)
         setIsLoading(false)
     }
 
 
 
-    const calculateAggregatedStaffData =<T,> (staff: T&{id:string,name:string}, attendances: AttendanceType[]) => {  
-            let totalPresents = 0,
-                totalAbsents = 0,
-                totalLeaves = 0;
+    const calculateAggregatedStaffData = <T,>(staff: T & { id: string, name: string }, attendances: AttendanceType[]) => {
+        let totalPresents = 0,
+            totalAbsents = 0,
+            totalLeaves = 0;
 
-            attendances
-                ?.filter((attendance) => attendance?.staffId === staff?.id)
-                ?.forEach((attendance) => {
-                    if (attendance?.status === AttendanceStatusEnum.PRESENT) totalPresents++
-                    else if (attendance?.status === AttendanceStatusEnum.ABSENT) totalAbsents++
-                    else if (attendance?.status === AttendanceStatusEnum.LEAVE) totalLeaves++
-                })
+        attendances
+            ?.filter((attendance) => attendance?.staffId === staff?.id)
+            ?.forEach((attendance) => {
+                if (attendance?.status === AttendanceStatusEnum.PRESENT) totalPresents++
+                else if (attendance?.status === AttendanceStatusEnum.ABSENT) totalAbsents++
+                else if (attendance?.status === AttendanceStatusEnum.LEAVE) totalLeaves++
+            })
 
-            const preparedStaff= {
-                id: staff?.id,
-                name: staff?.name,
-                totalAbsents,
-                totalLeaves,
-                totalPresents
-            }
-        
+        const preparedStaff = {
+            id: staff?.id,
+            name: staff?.name,
+            totalAbsents,
+            totalLeaves,
+            totalPresents
+        }
+
 
         return preparedStaff
     }
 
 
-    const reCalculateAndSetStaffAggregateData=(staffId:string,attendances:AttendanceType[])=>{
-        
-        const updatedStaffIndex = staffs?.findIndex((_staff) => _staff?.id === staffId)
-        
+    const reCalculateAndSetStaffAggregateData = (staffId: string, attendances: AttendanceType[]) => {
+
+        const updatedStaffIndex = aggregatedStaffsData?.findIndex((_staff) => _staff?.id === staffId)
+
         if (updatedStaffIndex === -1) {
             toast.error("Staff Not Found")
             return
         }
 
-        const updatedStaff=calculateAggregatedStaffData(staffs[updatedStaffIndex],attendances)
+        const updatedStaff = calculateAggregatedStaffData(aggregatedStaffsData[updatedStaffIndex], attendances)
 
-        const updatedStaffs = structuredClone(staffs)
+        const updatedStaffs = structuredClone(aggregatedStaffsData)
 
         updatedStaffs[updatedStaffIndex] = updatedStaff
 
-        setStaffs(updatedStaffs)
+        setAggregatedStaffsData(updatedStaffs)
 
     }
 
@@ -114,22 +127,51 @@ const Page = () => {
         }
 
         setAttendances(updatedAttendances)
+
+
+        const updatedFilteredAttendanceIndex = filteredAttendances?.findIndex((filteredAttendance) => filteredAttendance?.id === attendanceId)
+
+        if (updatedAttendanceIndex === -1) {
+            toast.error("Filtered Attendance Not Found")
+            return
+        }
+
+        const updatedFilteredAttendances = structuredClone(filteredAttendances)
+
+        updatedFilteredAttendances[updatedFilteredAttendanceIndex] = {
+            ...updatedFilteredAttendances[updatedFilteredAttendanceIndex],
+            status: newAttendance?.status,
+            remarks: newAttendance?.remarks
+        }
+
+        setFilteredAttendances(updatedFilteredAttendances)
+
+
         filterAndSetSelectedStaffAttendances(updatedAttendances, selectedStaff?.id as string)
-        reCalculateAndSetStaffAggregateData(selectedStaff?.id as string,updatedAttendances)
+        console.log(updatedFilteredAttendances);
+        
+        reCalculateAndSetStaffAggregateData(selectedStaff?.id as string, updatedFilteredAttendances)
     }
 
     const createLocalAttendance = (attendanceId: string, payload: Omit<AttendanceType, "id">) => {
-        const updatedAttendances: AttendanceType[] = [
-            ...attendances,
-            {
+        const newAttendance={
                 id: attendanceId,
                 ...payload
             }
+        
+        const updatedAttendances: AttendanceType[] = [
+            ...attendances,
+            newAttendance
         ]
 
         setAttendances(updatedAttendances)
+        const newFilteredAttendances=[...filteredAttendances,newAttendance]
+        setFilteredAttendances(newFilteredAttendances)
+
+
         filterAndSetSelectedStaffAttendances(updatedAttendances, selectedStaff?.id as string)
-        reCalculateAndSetStaffAggregateData(selectedStaff?.id as string,updatedAttendances)
+        reCalculateAndSetStaffAggregateData(selectedStaff?.id as string, newFilteredAttendances)
+
     }
 
 
@@ -142,11 +184,6 @@ const Page = () => {
         filterAndSetSelectedStaffAttendances(attendances, data?.id)
         setSelectedStaff(data)
     }
-
-    useEffect(()=>{
-        console.log(selectedStaffAttendances);
-        
-    },[selectedStaffAttendances])
 
     const onDateClick = (date: string) => {
         const attendance = selectedStaffAttendances?.find((event) => event?.date === date)
@@ -219,6 +256,43 @@ const Page = () => {
     }
 
 
+    const isAttendanceInFilteredRange=(attendanceDate: string) =>
+                new Date(attendanceDate) >= new Date(filterDates?.starting as string ) && 
+                new Date(attendanceDate) <= new Date(filterDates?.ending as string)
+    
+    const isFilterRangeValid=()=>filterDates?.starting && filterDates?.ending
+
+    const onFilterDateSelect = () => {
+
+        
+        
+        let filteredAttendances:AttendanceType[]=[]
+        if (isFilterRangeValid()) {
+            
+            filteredAttendances = attendances?.filter((attendance) =>
+                isAttendanceInFilteredRange(attendance?.date)
+        )
+        console.log(filteredAttendances)
+            setFilteredAttendances(filteredAttendances)
+            
+        }else{
+            filteredAttendances=attendances
+            setFilteredAttendances(attendances)
+        }
+
+        
+
+        const preparedStaffs = staffs.map((staff) => calculateAggregatedStaffData(staff, filteredAttendances))
+        setAggregatedStaffsData(preparedStaffs)
+
+    }
+
+
+    useEffect(() => {
+        onFilterDateSelect()
+
+    }, [filterDates])
+
     useEffect(() => { initializePage() }, [])
 
 
@@ -226,7 +300,31 @@ const Page = () => {
         <div className="h-full relative">
             {isLoading && <Loading />}
 
-            <DataTable columns={staffAttendanceTableColumns} data={staffs} onRowClick={onRowClick} />
+            <div className="flex w-full sm:justify-end mb-2">
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <DatePicker placeholder="Starting date" date={filterDates?.starting} onDateChange={(date) => setFilterDates((prev) => {
+                        return {
+                            ...prev,
+                            starting: date
+                        }
+                    })} />
+                    <DatePicker placeholder="Ending date"  date={filterDates?.ending} onDateChange={(date) => setFilterDates((prev) => {
+                        return {
+                            ...prev,
+                            ending: date
+                        }
+                    })} />
+
+                    <Button onClick={() => setFilterDates({
+                        ending: undefined,
+                        starting: undefined
+                    })} >Clear</Button>
+
+                </div>
+
+            </div>
+
+            <DataTable columns={staffAttendanceTableColumns} data={aggregatedStaffsData} onRowClick={onRowClick} />
 
 
             {selectedStaff &&

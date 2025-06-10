@@ -6,7 +6,7 @@ const ToastProvider = ({ children }: {
   return (
     <>
       {children}
-      <Toaster position="top-right" 
+      <Toaster position="top-center" 
       closeButton
       className="z-[500]"
       />

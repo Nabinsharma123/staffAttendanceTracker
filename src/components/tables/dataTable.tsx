@@ -21,7 +21,7 @@ import {
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
-    onRowClick?:(data:TData)=>void
+    onRowClick?:(data:TData,cellId:string)=>void
 }
 
 export function DataTable<TData, TValue>({
@@ -64,10 +64,12 @@ export function DataTable<TData, TValue>({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    onClick={()=>onRowClick?.(row.original)}
+                                    
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell key={cell.id}
+                                        onClick={()=>onRowClick?.(row.original,cell.column.id)}
+                                        >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}

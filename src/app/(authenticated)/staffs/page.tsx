@@ -3,6 +3,7 @@ import CreateOrUpdateStaffAttendanceFrom from "@/components/CreateOrUpdateStaffA
 import CreateOrUpdateStaffForm from "@/components/CreateOrUpdateStaffForm";
 import Loading from "@/components/Loading";
 import StaffAttendanceCalenderModalView from "@/components/StaffAttendanceCalenderModalView";
+import StaffViewCard from "@/components/StaffViewCard";
 import { createStaffTableColumns } from "@/components/tables/columns";
 import { DataTable } from "@/components/tables/dataTable"
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ const Page = () => {
   const [staffToUpdate, setStaffToUpdate] = useState<StaffType|undefined>(undefined);
   const [openCreateOrUpdateStaffForm, setOpenCreateOrUpdateStaffForm] = useState(false);
   const [isFormLoading, setIsFormLoading] = useState(false);
+  const [openStaffViewModal, setOpenStaffViewModal] = useState<StaffType|undefined>(undefined);
 
   const rowActionClick = async(type: "edit" | "delete", data: StaffType) => {
       if(type==="edit"){
@@ -44,8 +46,10 @@ const Page = () => {
 
   const staffTableColumns = useMemo(() => createStaffTableColumns(rowActionClick), []);
 
-  const onRowClick = (data: StaffType) => {
-
+  const onRowClick = (data: StaffType,cellId:string) => {
+    if(cellId!=="actions")
+    
+      setOpenStaffViewModal(data)
   }
 
 
@@ -166,6 +170,10 @@ const Page = () => {
 
       {openCreateOrUpdateStaffForm &&
         <CreateOrUpdateStaffForm staff={staffToUpdate} isFormLoading={isFormLoading} onSubmit={CreateOrUpdateStaffFormSubmit} close={closeCreateOrUpdateStaffForm} />
+      }
+
+      {openStaffViewModal&&
+      <StaffViewCard staff={openStaffViewModal} close={()=>setOpenStaffViewModal(undefined)} />
       }
     </div>
   )

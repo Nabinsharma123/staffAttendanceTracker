@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import { StaffAttendanceTableType, StaffType } from "@/lib/types"
 
 
-export const createStaffTableColumns=(actionClick?:(type:"edit"|"delete",data:StaffType)=>void)=>{
+export const createStaffTableColumns=(actionClick?:(type:"edit"|"delete",data:StaffType)=>void):ColumnDef<StaffType>[]=>{
   return [
   {
     accessorKey: "name",

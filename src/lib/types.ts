@@ -5,7 +5,7 @@ export type StaffType = {
   id: string,
   name: string,
   email: string,
-  joiningDate: string,
+  createdAt: string,
   role: string
 }
 

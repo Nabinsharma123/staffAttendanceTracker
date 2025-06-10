@@ -1,6 +1,6 @@
 "use client"
 
-import { ColumnDef } from "@tanstack/react-table"
+import { Cell, ColumnDef } from "@tanstack/react-table"
 import { MoreHorizontal } from "lucide-react"
 import {
   DropdownMenu,
@@ -13,7 +13,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { StaffAttendanceTableType, StaffType } from "@/lib/types"
 
-export const staffTableColumns: ColumnDef<StaffType>[] = [
+
+export const createStaffTableColumns=(actionClick?:(type:"edit"|"delete",data:StaffType)=>void)=>{
+  return [
   {
     accessorKey: "name",
     header: "Name",
@@ -28,10 +30,11 @@ export const staffTableColumns: ColumnDef<StaffType>[] = [
   },
   {
     id: "actions",
-    cell: () => {
- 
+    cell: (cell:any) => {
+    const rowValue=cell?.row?.original as StaffType
+        
       return (
-        <DropdownMenu>
+        <DropdownMenu >
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
@@ -39,16 +42,17 @@ export const staffTableColumns: ColumnDef<StaffType>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuItem  onClick={()=>actionClick?.("edit",rowValue)}>Edit</DropdownMenuItem>
+            <DropdownMenuItem  onClick={()=>actionClick?.("delete",rowValue)}>Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
     },
   },
 ]
+}
+
+
 
 export const staffAttendanceTableColumns: ColumnDef<StaffAttendanceTableType>[] = [
   {

@@ -51,7 +51,7 @@ const CreateOrUpdateStaffAttendanceFrom = (props: ComponentPropsType) => {
           <FormField
             control={form.control}
             name="date"
-            render={({ field, fieldState }) => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Date</FormLabel>
                 <FormControl>
@@ -67,7 +67,7 @@ const CreateOrUpdateStaffAttendanceFrom = (props: ComponentPropsType) => {
           <FormField
             control={form.control}
             name="status"
-            render={({ field, fieldState }) => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Status</FormLabel>
                 <FormControl>

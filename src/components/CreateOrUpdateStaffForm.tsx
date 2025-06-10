@@ -1,14 +1,15 @@
-import { AttendanceStatusEnum, createOrUpdateStaffFormType, StaffType } from "@/lib/types";
+"use client"
+
+import {createOrUpdateStaffFormType, StaffType } from "@/lib/types";
 import { createOrUpdateStaffValidation } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@radix-ui/react-select";
 import { Loader2Icon } from "lucide-react";
-import { Form, SubmitHandler, useForm } from "react-hook-form";
+import {  SubmitHandler, useForm } from "react-hook-form";
 import FreeFormModal from "./FreeFormModal";
 import { Button } from "./ui/button";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "./ui/form";
+import { Form,FormField, FormItem, FormLabel, FormControl, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { useEffect } from "react";
 
 type ComponentPropsType = {
     staff?: StaffType
@@ -38,19 +39,19 @@ const CreateOrUpdateStaffForm = (props: ComponentPropsType) => {
 
 
     return (
-        <FreeFormModal title="Attendance" close={close}>
+        <FreeFormModal title="Staff" close={close}>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onFormSubmit)} className="w-2/3 space-y-6">
+        <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-6">
 
          <FormField
             control={form.control}
             name="name"
-            render={({ field,fieldState }) => (
+            render={({ field }) => (
               <FormItem>
-                <FormLabel>Date</FormLabel>
+                <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Name" {...field} disabled />
+                  <Input placeholder="Name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -62,9 +63,9 @@ const CreateOrUpdateStaffForm = (props: ComponentPropsType) => {
           <FormField
             control={form.control}
             name="email"
-            render={({ field,fieldState }) => (
+            render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input placeholder="Email" {...field} />
                 </FormControl>
@@ -78,7 +79,7 @@ const CreateOrUpdateStaffForm = (props: ComponentPropsType) => {
             name="role"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Remarks</FormLabel>
+                <FormLabel>Role</FormLabel>
                 <FormControl>
                   <Input placeholder="Role" {...field} />
                 </FormControl>

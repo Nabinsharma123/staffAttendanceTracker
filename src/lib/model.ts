@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, query, updateDoc, where } from "firebase/firestore/lite";
+import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from "firebase/firestore/lite";
 import { AttendanceType, StaffType } from "./types";
 import { db } from "./firebase";
 import { handleRequest } from "./helpers";
@@ -127,4 +127,55 @@ export const updateStaffAttendance = async (
     }
     finalCb?.()
 
+}
+
+
+export const createStaff=async(
+    payload: Omit<StaffType, "id">,
+    successCb?: (docId: string) => void,
+    errorCb?: () => void,
+    finalCb?: () => void
+)=>{
+      const { data, error } = await handleRequest(addDoc(collection(db, "staffs"), payload))
+    if (error) {
+        errorCb?.()
+        finalCb?.()
+    }
+
+    successCb?.(data?.id as string)
+    finalCb?.()
+}
+
+export const updateStaff=async(
+    id: string,
+    payload: Omit<StaffType, "id"|"createdAt">,
+    successCb?: () => void,
+    errorCb?: () => void,
+    finalCb?: () => void
+)=>{
+      const { data, error } = await handleRequest( 
+        updateDoc(doc(db, "staffs", id),payload))
+    if (error) {
+        errorCb?.()
+        finalCb?.()
+    }
+
+    successCb?.()
+    finalCb?.()
+}
+
+export const deleteStaff=async(
+     id: string,
+    successCb?: () => void,
+    errorCb?: () => void,
+    finalCb?: () => void
+)=>{
+    const {data,error}= await handleRequest(deleteDoc(doc(db,"staffs",id)))
+     if (error) {
+        errorCb?.()
+        finalCb?.()
+    }
+
+    successCb?.()
+    finalCb?.()
 }

@@ -35,7 +35,7 @@ const StaffAttendanceCalenderModalView = (props: ComponentPropsType) => {
 
 
   return (
-    <FreeFormModal className='min-w-[80vw] !h-[90vh]' title='title' close={close}>
+    <FreeFormModal className='min-w-[80vw] !h-[90vh]' title='Staff Attendance' close={close}>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"

@@ -1,162 +1,163 @@
 "use client"
 import CreateOrUpdateStaffAttendanceFrom from "@/components/CreateOrUpdateStaffAttendanceForm";
+import CreateOrUpdateStaffForm from "@/components/CreateOrUpdateStaffForm";
 import Loading from "@/components/Loading";
 import StaffAttendanceCalenderModalView from "@/components/StaffAttendanceCalenderModalView";
-import { staffTableColumns } from "@/components/tables/columns"
+import { createStaffTableColumns } from "@/components/tables/columns";
 import { DataTable } from "@/components/tables/dataTable"
 import { Button } from "@/components/ui/button";
-import { prepareCreateAttendancePayload, prepareUpdateAttendancePayload } from "@/lib/helpers";
-import { createStaffAttendance, getStaffAttendances, getStaffs, updateStaffAttendance } from "@/lib/model";
-import { AttendanceType, CreateOrUpdateAttendanceFromType, StaffType } from "@/lib/types";
-import { useEffect, useState } from "react";
+import { prepareCreateAttendancePayload, prepareCreateStaffPayload, prepareUpdateAttendancePayload, prepareUpdateStaffPayload } from "@/lib/helpers";
+import { createStaff, createStaffAttendance, deleteStaff, getStaffAttendances, getStaffs, updateStaff, updateStaffAttendance } from "@/lib/model";
+import { AttendanceType, CreateOrUpdateAttendanceFromType, createOrUpdateStaffFormType, StaffType } from "@/lib/types";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 
 
 const Page = () => {
 
-  const [staffs, setStaffs] = useState<StaffType[]>([]);
-
-
-  const [selectedStaff, setSelectedStaff] = useState<StaffType | undefined>(undefined);
-  const [calenderDateToAddAttendance, setCalenderDateToAddAttendance] = useState<string | undefined>(undefined);
-  const [isFormLoading, setIsFormLoading] = useState(false);
-  const [attendanceToUpdate, setAttendanceToUpdate] = useState<AttendanceType | undefined>(undefined);
-  const [selectedStaffAttendances, setSelectedStaffAttendances] = useState<AttendanceType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [staffs, setStaffs] = useState<StaffType[]>([]);
+  const [staffToUpdate, setStaffToUpdate] = useState<StaffType|undefined>(undefined);
+  const [openCreateOrUpdateStaffForm, setOpenCreateOrUpdateStaffForm] = useState(false);
+  const [isFormLoading, setIsFormLoading] = useState(false);
+
+  const rowActionClick = async(type: "edit" | "delete", data: StaffType) => {
+      if(type==="edit"){
+        setStaffToUpdate(data)
+        setOpenCreateOrUpdateStaffForm(true)
+      } else{
+        setIsLoading(true)
+        await deleteStaff(data?.id,
+          ()=>{
+            toast?.success("Staff deleted")
+            deleteLocalStaff(data?.id)
+          },()=>{
+            toast?.error("Error while deleting Staff")
+          },()=>{
+            setIsLoading(false)
+          }
+        )
+      }
+  }
+
+
+  const staffTableColumns = useMemo(() => createStaffTableColumns(rowActionClick), []);
+
+  const onRowClick = (data: StaffType) => {
+
+  }
 
 
   const initializePage = async () => {
-    fetchAndSetSelectedStaff()
-  }
-
-
-  const fetchAndSetSelectedStaff = async () => {
     setIsLoading(true)
-    const staffs = await getStaffs(() => {
+    const staff = await getStaffs(() => {
       toast.error("Error while getting staffs")
     })
-
-    setStaffs(staffs)
-    setIsLoading(false)
-  }
-
-  useEffect(() => { initializePage() }, [])
-
-
-  const fetchAndSetSelectedStaffAttendances = async (staffId: string) => {
-    setIsLoading(true)
-    const staffAttendances = await getStaffAttendances(staffId, () => {
-      toast.error("Error while getting Attendances")
-    })
-
-    setSelectedStaffAttendances(staffAttendances)
-
+    setStaffs(staff)
     setIsLoading(false)
 
   }
 
-  const onRowClick = async (data: StaffType) => {
-    await fetchAndSetSelectedStaffAttendances(data?.id)
-    setSelectedStaff(data)
+  const closeCreateOrUpdateStaffForm = () => {
+    setOpenCreateOrUpdateStaffForm(false)
+    setStaffToUpdate(undefined)
   }
 
-  const onDateClick = (date: string) => {
-    const attendance = selectedStaffAttendances?.find((event) => event?.date === date)
-    if (attendance) {
-      setAttendanceToUpdate(attendance)
-    } else {
-      setCalenderDateToAddAttendance(date)
-    }
+
+  const createLocalStaff=(staffId:string,payload:Omit<StaffType, "id">)=>{
+    const updatedStaffs=[
+      {
+        id:staffId,
+        ...payload
+      },
+      ...staffs
+    ]
+
+    setStaffs(updatedStaffs)
   }
 
-  const closeStaffAttendanceCalenderModal = () => {
-    setSelectedStaffAttendances([])
-    setSelectedStaff(undefined)
-  }
+   const updateLocalStaff=(staffId:string,payload: Omit<StaffType, "id" | "createdAt">)=>{
+    const updatedStaffIndex=staffs?.findIndex((staff)=>staff?.id===staffId)
 
-  const closeStaffAttendanceFormModal = () => {
-    setCalenderDateToAddAttendance(undefined)
-    setAttendanceToUpdate(undefined)
-  }
-
-  const createOrUpdateStaffAttendanceFromSubmit = (data: CreateOrUpdateAttendanceFromType, type: "create" | "update") => {
-
-    if (!selectedStaff) {
-      toast.error("Staff Not Found")
+    if(updatedStaffIndex===-1){
+      toast.error("Staff not Found")
       return
     }
 
-    setIsFormLoading(true)
-    if (type == "create") {
+    const updatedStaffs=structuredClone(staffs)
 
-
-      const payload = prepareCreateAttendancePayload(data, selectedStaff)
-      createStaffAttendance(payload,
-        () => {
-          toast.success("Attendance Added")
-          fetchAndSetSelectedStaffAttendances(selectedStaff?.id)
-          closeStaffAttendanceFormModal()
-        },
-        () => {
-          toast.error("Error While Adding Attendance")
-        },
-        () => {
-          setIsFormLoading(false)
-        }
-      )
-    } else {
-
-      if (!attendanceToUpdate) {
-        toast.error("Attendance Not Found")
-        setIsFormLoading(false)
-        return
-      }
-
-      const payload = prepareUpdateAttendancePayload(data)
-
-      updateStaffAttendance(attendanceToUpdate?.id, payload,
-        () => {
-          toast.success("Attendance Updated")
-          fetchAndSetSelectedStaffAttendances(selectedStaff?.id)
-          closeStaffAttendanceFormModal()
-        },
-        () => {
-          toast.error("Error While Updating Attendance")
-        },
-        () => {
-          setIsFormLoading(false)
-        }
-      )
+    updatedStaffs[updatedStaffIndex]={
+      ...updatedStaffs[updatedStaffIndex],
+      email:payload?.email,
+      name:payload?.name,
+      role:payload?.role
     }
+
+    setStaffs(updatedStaffs)
   }
 
+  const deleteLocalStaff=(staffId:string)=>{
+    const updatedStaffs=staffs?.filter((staff)=>staff?.id!==staffId)
+    setStaffs(updatedStaffs)
+  }
+
+  const CreateOrUpdateStaffFormSubmit=(data:createOrUpdateStaffFormType,type:"create"|"update")=>{
+      setIsFormLoading(true)
+    
+    if(type==="create"){
+        const payload=prepareCreateStaffPayload(data)
+        createStaff(payload,
+          (docId)=>{
+              toast.success("Staff Created")
+              createLocalStaff(docId,payload)
+              closeCreateOrUpdateStaffForm()
+          },
+          ()=>{
+            toast.error("Error While Creating Staff")
+          },()=>{
+            setIsFormLoading(false)
+          }
+        )
+      } else {
+
+        if(!staffToUpdate) {
+          toast.error("Staff Not Found")
+          return 
+        }
+
+        const payload=prepareUpdateStaffPayload(data)
+
+        updateStaff(
+          staffToUpdate?.id,
+          payload,
+          ()=>{
+              toast.success("Staff Updated")
+              updateLocalStaff(staffToUpdate?.id,payload)
+              closeCreateOrUpdateStaffForm()
+          },
+          ()=>{
+            toast.error("Error While Updating Staff")
+          },()=>{
+            setIsFormLoading(false)
+          }
+        )
+      }
+  }
+
+  useEffect(() => { initializePage() }, [])
 
   return (
     <div className="h-full relative">
       {isLoading && <Loading />}
 
       <div className="flex w-full justify-end mb-2">
-        <Button>Create Staff</Button>
+        <Button onClick={() => setOpenCreateOrUpdateStaffForm(true)} >Create Staff</Button>
       </div>
       <DataTable columns={staffTableColumns} data={staffs} onRowClick={onRowClick} />
 
-
-      {selectedStaff &&
-        <StaffAttendanceCalenderModalView
-          attendances={selectedStaffAttendances}
-          onDateClick={(data) => onDateClick(data?.dateStr)}
-          onEventClick={(data) => onDateClick(data?.event?.startStr)}
-          close={closeStaffAttendanceCalenderModal}
-        />}
-
-      {(calenderDateToAddAttendance || attendanceToUpdate) &&
-        <CreateOrUpdateStaffAttendanceFrom
-          calenderDateToAddAttendance={calenderDateToAddAttendance}
-          isFormLoading={isFormLoading}
-          onSubmit={createOrUpdateStaffAttendanceFromSubmit}
-          attendanceToUpdate={attendanceToUpdate}
-          close={closeStaffAttendanceFormModal} />
+      {openCreateOrUpdateStaffForm &&
+        <CreateOrUpdateStaffForm staff={staffToUpdate} isFormLoading={isFormLoading} onSubmit={CreateOrUpdateStaffFormSubmit} close={closeCreateOrUpdateStaffForm} />
       }
     </div>
   )

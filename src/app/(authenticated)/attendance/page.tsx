@@ -2,9 +2,8 @@
 import CreateOrUpdateStaffAttendanceFrom from "@/components/CreateOrUpdateStaffAttendanceForm";
 import Loading from "@/components/Loading";
 import StaffAttendanceCalenderModalView from "@/components/StaffAttendanceCalenderModalView";
-import { staffAttendanceTableColumns, staffTableColumns } from "@/components/tables/columns"
+import { staffAttendanceTableColumns } from "@/components/tables/columns"
 import { DataTable } from "@/components/tables/dataTable"
-import { Button } from "@/components/ui/button";
 import { prepareCreateAttendancePayload, prepareUpdateAttendancePayload } from "@/lib/helpers";
 import { createStaffAttendance, getAttendances, getStaffAttendances, getStaffs, updateStaffAttendance } from "@/lib/model";
 import { AttendanceStatusEnum, AttendanceType, CreateOrUpdateAttendanceFromType, StaffAttendanceTableType, StaffType } from "@/lib/types";
@@ -97,8 +96,6 @@ const Page = () => {
     }
 
 
-
-
     const updateLocalAttendance = (attendanceId: string, newAttendance: Pick<AttendanceType, "status" | "remarks">) => {
 
         const updatedAttendanceIndex = attendances?.findIndex((attendance) => attendance?.id === attendanceId)
@@ -185,7 +182,6 @@ const Page = () => {
             createStaffAttendance(payload,
                 (docId) => {
                     toast.success("Attendance Added")
-                    //   fetchAndSetSelectedStaffAttendances(selectedStaff?.id)
                     createLocalAttendance(docId, payload)
                     closeStaffAttendanceFormModal()
                 },

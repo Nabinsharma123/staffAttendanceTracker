@@ -7,7 +7,9 @@ const ToastProvider = ({ children }: {
     <>
       {children}
       <Toaster position="top-right" 
-      closeButton/>
+      closeButton
+      className="z-[500]"
+      />
     </>
   )
 };

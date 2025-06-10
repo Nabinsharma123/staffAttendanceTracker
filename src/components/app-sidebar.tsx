@@ -29,20 +29,15 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { UserType } from "@/lib/types"
 
 // This is sample data.
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Staffs",
       url: "/staffs",
       icon: Users,
-      isActive: true,
 
     },
     {
@@ -53,7 +48,7 @@ const data = {
   ]
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({user ,...props }: React.ComponentProps<typeof Sidebar>&{user?:UserType}) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -65,7 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <GalleryVerticalEnd className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-medium">Documentation</span>
+                  <span className="font-medium">Staff Attendance Tracker</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -76,7 +71,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user&&
+        <NavUser user={user} />
+        }
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

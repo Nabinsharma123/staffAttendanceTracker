@@ -1,32 +1,56 @@
 "use client"
 
 import { auth } from "@/lib/firebase";
-import { useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from 'next/navigation'
+import { UserType } from "@/lib/types";
+import Loading from "./Loading";
+
+export const UserContext = createContext<UserType | undefined>(undefined)
+
 
 const AuthGuard = ({ children }: {
     children: React.ReactNode;
 }) => {
     const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState<UserType | undefined>(undefined);
     const router = useRouter()
     const pathname = usePathname()
 
-    auth.onAuthStateChanged((session) => {
-        if(!session && pathname!=="/login"){
-            return router.replace("/login")
-        }
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((session) => {
+            console.log(session);
+            console.log(pathname);
+            
+            if (!session) {
+                setIsLoading(false);
+                if(pathname !== "/login")
+                  router.replace("/login");
+                return 
+            }
 
-        if(pathname==="/login") router.replace("/")
-        setIsLoading(false)
-    })
+            setUser({
+                id: session?.uid ,
+                email: session?.email as string,
+                displayName: session?.displayName as string,
+            });
+            
+            if (pathname === "/login") router.replace("/staffs");
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe(); // cleanup the listener
+    }, [pathname]);
 
     return (
         <>
             {isLoading
-             ?
-             <div>Loading</div>
-             :
-             children
+                ?
+                <Loading />
+                :
+                <UserContext value={user}>
+                    {children}
+                </UserContext>
             }
         </>
     )

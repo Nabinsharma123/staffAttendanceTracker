@@ -1,7 +1,8 @@
 import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from "firebase/firestore/lite";
-import { AttendanceType, StaffType } from "./types";
-import { db } from "./firebase";
+import { AttendanceType, LoginFormValidationType, StaffType } from "./types";
+import { auth, db } from "./firebase";
 import { handleRequest } from "./helpers";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 
 export const getStaffs = async (
@@ -102,6 +103,7 @@ export const createStaffAttendance = async (
     if (error) {
         errorCb?.()
         finalCb?.()
+        return
     }
 
     successCb?.(data?.id as string)
@@ -116,64 +118,87 @@ export const updateStaffAttendance = async (
     errorCb?: () => void,
     finalCb?: () => void
 ) => {
-
-    try {
-        await updateDoc(doc(db, "attendances", id),
-            payload
-        )
-        successCb?.()
-    } catch (error) {
+    const { data, error } = await handleRequest(updateDoc(doc(db, "attendances", id),payload))
+    if (error) {
         errorCb?.()
+        finalCb?.()
+        return
     }
+
+    successCb?.()
     finalCb?.()
 
 }
 
 
-export const createStaff=async(
+export const createStaff = async (
     payload: Omit<StaffType, "id">,
     successCb?: (docId: string) => void,
     errorCb?: () => void,
     finalCb?: () => void
-)=>{
-      const { data, error } = await handleRequest(addDoc(collection(db, "staffs"), payload))
+) => {
+    const { data, error } = await handleRequest(addDoc(collection(db, "staffs"), payload))
     if (error) {
         errorCb?.()
         finalCb?.()
+        return
     }
 
     successCb?.(data?.id as string)
     finalCb?.()
 }
 
-export const updateStaff=async(
+export const updateStaff = async (
     id: string,
-    payload: Omit<StaffType, "id"|"createdAt">,
+    payload: Omit<StaffType, "id" | "createdAt">,
     successCb?: () => void,
     errorCb?: () => void,
     finalCb?: () => void
-)=>{
-      const { data, error } = await handleRequest( 
-        updateDoc(doc(db, "staffs", id),payload))
+) => {
+    const { data, error } = await handleRequest(
+        updateDoc(doc(db, "staffs", id), payload))
     if (error) {
         errorCb?.()
         finalCb?.()
+        return
     }
 
     successCb?.()
     finalCb?.()
 }
 
-export const deleteStaff=async(
-     id: string,
+export const deleteStaff = async (
+    id: string,
     successCb?: () => void,
     errorCb?: () => void,
     finalCb?: () => void
-)=>{
-    const {data,error}= await handleRequest(deleteDoc(doc(db,"staffs",id)))
-     if (error) {
+) => {
+    const { data, error } = await handleRequest(deleteDoc(doc(db, "staffs", id)))
+    if (error) {
         errorCb?.()
         finalCb?.()
+        return
+    }
+
+    successCb?.()
+    finalCb?.()
+}
+
+
+export const logout = async () => {
+    await auth.signOut()
+}
+
+export const loginUser = async (formData: LoginFormValidationType,
+    successCb?: () => void,
+    errorCb?: () => void,
+    finalCb?: () => void
+) => {
+    const { data, error } = await handleRequest(signInWithEmailAndPassword(auth, formData?.email, formData?.password))
+    if (error) {
+        errorCb?.()
+        finalCb?.()
+        return
     }
 
     successCb?.()

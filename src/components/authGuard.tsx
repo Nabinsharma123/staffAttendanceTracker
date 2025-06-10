@@ -33,7 +33,7 @@ const AuthGuard = ({ children }: {
                 displayName: session?.displayName as string,
             });
             
-            if (pathname === "/login") router.replace("/staffs");
+            if (!["/staffs","/attendance"].includes(pathname)) router.replace("/staffs");
             setIsLoading(false);
         });
 

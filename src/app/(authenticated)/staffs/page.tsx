@@ -19,36 +19,36 @@ const Page = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [staffs, setStaffs] = useState<StaffType[]>([]);
-  const [staffToUpdate, setStaffToUpdate] = useState<StaffType|undefined>(undefined);
+  const [staffToUpdate, setStaffToUpdate] = useState<StaffType | undefined>(undefined);
   const [openCreateOrUpdateStaffForm, setOpenCreateOrUpdateStaffForm] = useState(false);
   const [isFormLoading, setIsFormLoading] = useState(false);
-  const [openStaffViewModal, setOpenStaffViewModal] = useState<StaffType|undefined>(undefined);
+  const [openStaffViewModal, setOpenStaffViewModal] = useState<StaffType | undefined>(undefined);
 
-  const rowActionClick = async(type: "edit" | "delete", data: StaffType) => {
-      if(type==="edit"){
-        setStaffToUpdate(data)
-        setOpenCreateOrUpdateStaffForm(true)
-      } else{
-        setIsLoading(true)
-        await deleteStaff(data?.id,
-          ()=>{
-            toast?.success("Staff deleted")
-            deleteLocalStaff(data?.id)
-          },()=>{
-            toast?.error("Error while deleting Staff")
-          },()=>{
-            setIsLoading(false)
-          }
-        )
-      }
+  const rowActionClick = async (type: "edit" | "delete", data: StaffType) => {
+    if (type === "edit") {
+      setStaffToUpdate(data)
+      setOpenCreateOrUpdateStaffForm(true)
+    } else {
+      setIsLoading(true)
+      await deleteStaff(data?.id,
+        () => {
+          toast?.success("Staff deleted")
+          deleteLocalStaff(data?.id)
+        }, () => {
+          toast?.error("Error while deleting Staff")
+        }, () => {
+          setIsLoading(false)
+        }
+      )
+    }
   }
 
 
   const staffTableColumns = useMemo(() => createStaffTableColumns(rowActionClick), []);
 
-  const onRowClick = (data: StaffType,cellId:string) => {
-    if(cellId!=="actions")
-    
+  const onRowClick = (data: StaffType, cellId: string) => {
+    if (cellId !== "actions")
+
       setOpenStaffViewModal(data)
   }
 
@@ -69,10 +69,10 @@ const Page = () => {
   }
 
 
-  const createLocalStaff=(staffId:string,payload:Omit<StaffType, "id">)=>{
-    const updatedStaffs=[
+  const createLocalStaff = (staffId: string, payload: Omit<StaffType, "id">) => {
+    const updatedStaffs = [
       {
-        id:staffId,
+        id: staffId,
         ...payload
       },
       ...staffs
@@ -81,74 +81,75 @@ const Page = () => {
     setStaffs(updatedStaffs)
   }
 
-   const updateLocalStaff=(staffId:string,payload: Omit<StaffType, "id" | "createdAt">)=>{
-    const updatedStaffIndex=staffs?.findIndex((staff)=>staff?.id===staffId)
+  const updateLocalStaff = (staffId: string, payload: Omit<StaffType, "id" | "createdAt">) => {
+    const updatedStaffIndex = staffs?.findIndex((staff) => staff?.id === staffId)
 
-    if(updatedStaffIndex===-1){
+    if (updatedStaffIndex === -1) {
       toast.error("Staff not Found")
       return
     }
 
-    const updatedStaffs=structuredClone(staffs)
+    const updatedStaffs = structuredClone(staffs)
 
-    updatedStaffs[updatedStaffIndex]={
+    updatedStaffs[updatedStaffIndex] = {
       ...updatedStaffs[updatedStaffIndex],
-      email:payload?.email,
-      name:payload?.name,
-      role:payload?.role
+      email: payload?.email,
+      name: payload?.name,
+      role: payload?.role
     }
 
     setStaffs(updatedStaffs)
   }
 
-  const deleteLocalStaff=(staffId:string)=>{
-    
-    const updatedStaffs=staffs?.filter((staff)=>staff?.id!==staffId)
-    setStaffs(updatedStaffs)
+  const deleteLocalStaff = (staffId: string) => {
+    setStaffs(prev => {
+      const updatedStaffs = prev.filter(staff => staff.id !== staffId);
+      return updatedStaffs;
+    });
   }
 
 
-  const CreateOrUpdateStaffFormSubmit=(data:createOrUpdateStaffFormType,type:"create"|"update")=>{
-      setIsFormLoading(true)
-    
-    if(type==="create"){
-        const payload=prepareCreateStaffPayload(data)
-        createStaff(payload,
-          (docId)=>{
-              toast.success("Staff Created")
-              createLocalStaff(docId,payload)
-              closeCreateOrUpdateStaffForm()
-          },
-          ()=>{
-            toast.error("Error While Creating Staff")
-          },()=>{
-            setIsFormLoading(false)
-          }
-        )
-      } else {
+  const CreateOrUpdateStaffFormSubmit = (data: createOrUpdateStaffFormType, type: "create" | "update") => {
+    setIsFormLoading(true)
 
-        if(!staffToUpdate) {
-          toast.error("Staff Not Found")
-          return 
+    if (type === "create") {
+      const payload = prepareCreateStaffPayload(data)
+      createStaff(payload,
+        (docId) => {
+          toast.success("Staff Created")
+          createLocalStaff(docId, payload)
+          closeCreateOrUpdateStaffForm()
+        },
+        () => {
+          toast.error("Error While Creating Staff")
+        }, () => {
+          setIsFormLoading(false)
         }
+      )
+    } else {
 
-        const payload=prepareUpdateStaffPayload(data)
-
-        updateStaff(
-          staffToUpdate?.id,
-          payload,
-          ()=>{
-              toast.success("Staff Updated")
-              updateLocalStaff(staffToUpdate?.id,payload)
-              closeCreateOrUpdateStaffForm()
-          },
-          ()=>{
-            toast.error("Error While Updating Staff")
-          },()=>{
-            setIsFormLoading(false)
-          }
-        )
+      if (!staffToUpdate) {
+        toast.error("Staff Not Found")
+        return
       }
+
+      const payload = prepareUpdateStaffPayload(data)
+
+      updateStaff(
+        staffToUpdate?.id,
+        payload,
+        () => {
+          toast.success("Staff Updated")
+          updateLocalStaff(staffToUpdate?.id, payload)
+          closeCreateOrUpdateStaffForm()
+        },
+        () => {
+          toast.error("Error While Updating Staff")
+        }, () => {
+          setIsFormLoading(false)
+        }
+      )
+    }
   }
 
   useEffect(() => { initializePage() }, [])
@@ -166,8 +167,8 @@ const Page = () => {
         <CreateOrUpdateStaffForm staff={staffToUpdate} isFormLoading={isFormLoading} onSubmit={CreateOrUpdateStaffFormSubmit} close={closeCreateOrUpdateStaffForm} />
       }
 
-      {openStaffViewModal&&
-      <StaffViewCard staff={openStaffViewModal} close={()=>setOpenStaffViewModal(undefined)} />
+      {openStaffViewModal &&
+        <StaffViewCard staff={openStaffViewModal} close={() => setOpenStaffViewModal(undefined)} />
       }
     </div>
   )
